@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 @Entity
 @Table(name = "USER")
 public class User {
@@ -24,6 +26,9 @@ public class User {
 
     @Column(name = "About")
     private String about;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<Post> posts;
 
     public int getId() {
         return Id;
