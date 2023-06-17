@@ -3,6 +3,7 @@ package com.example.blogApplication.services;
 import com.example.blogApplication.dtos.UserDTO;
 import com.example.blogApplication.exceptions.RohanException;
 import com.example.blogApplication.model.User;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.List;
 public interface UserService {
 
     UserDTO createUser(UserDTO userDTO);
+
+    UserDTO registerNewUser(UserDTO userDTO);
     UserDTO getUserById(Integer id) throws RohanException;
 
     List<UserDTO> getAllUsers();

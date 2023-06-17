@@ -1,13 +1,20 @@
 package com.example.blogApplication.serviceImpl;
 
+import com.example.blogApplication.AppConstants;
 import com.example.blogApplication.dtos.UserDTO;
 import com.example.blogApplication.exceptions.RohanException;
+import com.example.blogApplication.model.Role;
 import com.example.blogApplication.model.User;
+import com.example.blogApplication.repositories.RoleRepository;
 import com.example.blogApplication.repositories.UserRepository;
 import com.example.blogApplication.services.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,11 +23,36 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public UserDTO createUser(UserDTO userDTO) {
         User user = userDTO.toPO();
         User saveUser = userRepository.save(user);
         return saveUser.toDTO();
+    }
+
+    @Override
+    public UserDTO registerNewUser(UserDTO userDTO) {
+
+        User user = modelMapper.map(userDTO,User.class);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        Role role = roleRepository.findById(AppConstants.RoleIdNormal).get();
+
+        user.setRoles(Arrays.asList(role));
+
+        User getFinalUser = userRepository.save(user);
+
+        return modelMapper.map(getFinalUser,UserDTO.class);
     }
 
     @Override

@@ -5,12 +5,12 @@ import com.example.blogApplication.exceptions.RohanException;
 import com.example.blogApplication.model.Category;
 import com.example.blogApplication.payload.ResponseDTO;
 import com.example.blogApplication.services.CategoryService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController

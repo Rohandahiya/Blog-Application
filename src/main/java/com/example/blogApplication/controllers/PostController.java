@@ -1,15 +1,27 @@
 package com.example.blogApplication.controllers;
 
+import com.example.blogApplication.AppConstants;
 import com.example.blogApplication.dtos.PostDTO;
 import com.example.blogApplication.exceptions.RohanException;
 import com.example.blogApplication.model.Post;
+import com.example.blogApplication.responses.PostPageResponse;
+import com.example.blogApplication.services.FileService;
 import com.example.blogApplication.services.PostService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.attribute.standard.Media;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
@@ -18,6 +30,12 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private FileService fileService;
+
+    @Value("${project.path}")
+    private String filePath;
 
     @PostMapping("/add")
     public ResponseEntity<?> postUser(@RequestBody PostDTO postDTO, @RequestParam(value = "userId",required = true) Integer userId, @RequestParam(value="categoryId",required = true) Integer categoryId){
@@ -66,9 +84,9 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getPostsById(@RequestParam(defaultValue = "10",required = false) Integer pageNumber,@RequestParam(defaultValue = "1",required = false) Integer pageSize){
+    public ResponseEntity<?> getPostsById(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false) Integer pageNumber, @RequestParam(defaultValue = AppConstants.PAGE_SIzE,required = false) Integer pageSize, @RequestParam(defaultValue = AppConstants.SORT_VALUE,required = false) String sortBy){
 
-            List<PostDTO> response = postService.getAllPost(pageNumber,pageSize);
+            PostPageResponse response = postService.getAllPost(pageNumber,pageSize,sortBy);
             return ResponseEntity.status(HttpStatus.OK).body(response);
 
 
@@ -86,6 +104,15 @@ public class PostController {
 
     }
 
+    @GetMapping("/get/keyword/{searchString}")
+    public ResponseEntity<?> getPostsOnSearchString(@PathVariable("searchString") String keyword){
+
+        List<PostDTO> response = postService.searchPost(keyword);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+
+    }
+
     @DeleteMapping("/delete/{post_id}")
     public  ResponseEntity<?> deletePost(@PathVariable("post_id") Integer id){
 
@@ -93,5 +120,43 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body("Deleted");
     }
 
+    @PostMapping("/upload/image")
+    public ResponseEntity<?> uploadImage(@RequestParam("file")MultipartFile file){
+
+        if(file.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No file in request");
+        }
+
+        if(!(file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")).equalsIgnoreCase(".jpg"))){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Only jpg images allowed");
+        }
+
+        try {
+            fileService.uploadImage(filePath,file);
+            return ResponseEntity.status(HttpStatus.OK).body("File successfully uploaded");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @GetMapping(value = "/get/image/{imageName}",produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<?> getImage(@PathVariable("imageName") String imagename, HttpServletResponse httpServletResponse){
+
+        try {
+            InputStream inputStream = fileService.getImage(filePath,imagename);
+            httpServletResponse.setContentType(MediaType.IMAGE_JPEG_VALUE);
+            StreamUtils.copy(inputStream,httpServletResponse.getOutputStream());
+            return ResponseEntity.status(HttpStatus.OK).body("downloded");
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.OK).body("error occured");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
 
 }

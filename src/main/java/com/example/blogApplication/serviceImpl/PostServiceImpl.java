@@ -8,14 +8,15 @@ import com.example.blogApplication.model.User;
 import com.example.blogApplication.repositories.CategoryRepository;
 import com.example.blogApplication.repositories.PostRepository;
 import com.example.blogApplication.repositories.UserRepository;
+import com.example.blogApplication.responses.PostPageResponse;
 import com.example.blogApplication.services.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.util.Date;
 import java.util.List;
@@ -106,22 +107,39 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> getAllPost(Integer pageNumber, Integer pageSize) {
+    public PostPageResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy) {
 
-        Pageable pageable = PageRequest.of(pageNumber,pageSize);
+        PostPageResponse response = new PostPageResponse();
+        Sort sort = Sort.by(sortBy);
+        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
 
         Page<Post> pageOfPosts = postRepository.findAll(pageable);
 
         List<Post> posts = pageOfPosts.getContent();
 
-        return posts.stream().map(post -> modelMapper.map(post,PostDTO.class)).collect(Collectors.toList());
+        response.setData(posts.stream().map(post -> modelMapper.map(post,PostDTO.class)).collect(Collectors.toList()));
+        response.setLast(pageOfPosts.isLast());
+        response.setPageNumber(pageOfPosts.getNumber());
+        response.setPageSize(pageOfPosts.getSize());
+        response.setTotalItems((int) pageOfPosts.getTotalElements());
+        response.setTotalPages(pageOfPosts.getTotalPages());
+
+        return response;
     }
 
     @Override
     public void deletePost(Integer id) {
-
-
-
         postRepository.deleteById(id);
     }
+
+    @Override
+    public List<PostDTO> searchPost(String keyword) {
+
+         List<Post> posts = postRepository.findByTitleContaining(keyword);
+
+        return posts.stream().map(post -> modelMapper.map(post,PostDTO.class)).collect(Collectors.toList());
+
+    }
+
+
 }

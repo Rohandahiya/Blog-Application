@@ -1,10 +1,11 @@
 package com.example.blogApplication.model;
 
 import com.example.blogApplication.dtos.UserDTO;
-import jakarta.persistence.*;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -29,6 +30,40 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Post> posts;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<Comment> comments;
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    @ManyToMany
+    @JoinTable(name = "USER_VS_ROLE",
+    joinColumns = @JoinColumn(name = "user",referencedColumnName = "Id"),
+            inverseJoinColumns = @JoinColumn(name = "role",referencedColumnName = "id")
+    )
+    private List<Role> roles;
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
 
     public int getId() {
         return Id;

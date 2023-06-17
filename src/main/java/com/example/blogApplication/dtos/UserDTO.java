@@ -1,13 +1,12 @@
 package com.example.blogApplication.dtos;
 
 import com.example.blogApplication.model.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 
 public class UserDTO {
     private int Id;
@@ -24,6 +23,8 @@ public class UserDTO {
     private String email;
 
     private String about;
+
+//    List<RoleDTO> roles;
 
     public int getId() {
         return Id;

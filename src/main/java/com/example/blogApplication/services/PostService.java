@@ -2,7 +2,7 @@ package com.example.blogApplication.services;
 
 import com.example.blogApplication.dtos.PostDTO;
 import com.example.blogApplication.exceptions.RohanException;
-import com.example.blogApplication.model.Post;
+import com.example.blogApplication.responses.PostPageResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +21,11 @@ public interface PostService {
 
     PostDTO getPostById(Integer Id) throws RohanException;
 
-    List<PostDTO> getAllPost(Integer pageNumber, Integer pageSize);
+    PostPageResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy);
 
     void deletePost(Integer id);
+
+    List<PostDTO> searchPost(String keyword);
 
 
 

@@ -3,7 +3,8 @@ package com.example.blogApplication.controllers;
 import com.example.blogApplication.dtos.UserDTO;
 import com.example.blogApplication.exceptions.RohanException;
 import com.example.blogApplication.services.UserService;
-import jakarta.validation.Valid;
+import javax.persistence.*;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,14 @@ public class UserController {
         }catch (RohanException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO){
+
+            UserDTO responseUserDTO = userService.registerNewUser(userDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(responseUserDTO);
 
     }
 
